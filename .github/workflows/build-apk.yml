@@ -1,0 +1,84 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build web assets
+      run: npm run build
+    
+    - name: Setup Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        cache: 'gradle'
+    
+    - name: Sync Capacitor
+      run: npx cap sync android
+    
+    - name: Make gradlew executable
+      run: chmod +x android/gradlew
+    
+    - name: Build Debug APK
+      working-directory: ./android
+      run: ./gradlew assembleDebug
+    
+    - name: Build Release APK (unsigned)
+      working-directory: ./android
+      run: ./gradlew assembleRelease
+    
+    - name: Upload Debug APK (Universal)
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-universal-debug
+        path: android/app/build/outputs/apk/debug/app-universal-debug.apk
+        retention-days: 30
+    
+    - name: Upload Debug APK (arm64-v8a)
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-arm64-v8a-debug
+        path: android/app/build/outputs/apk/debug/app-arm64-v8a-debug.apk
+        retention-days: 30
+    
+    - name: Upload Release APK (Universal)
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-universal-release
+        path: android/app/build/outputs/apk/release/app-universal-release-unsigned.apk
+        retention-days: 90
+    
+    - name: Create Release
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v1.0-build-${{ github.run_number }}
+        name: Arb Visualizer v1.0 (Build ${{ github.run_number }})
+        draft: false
+        prerelease: false
+        files: |
+          android/app/build/outputs/apk/debug/app-universal-debug.apk
+          android/app/build/outputs/apk/release/app-universal-release-unsigned.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

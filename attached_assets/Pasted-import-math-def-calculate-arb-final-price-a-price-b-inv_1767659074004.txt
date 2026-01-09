@@ -1,0 +1,72 @@
+import math
+
+def calculate_arb_final(price_a, price_b, investment, mode="Maker"):
+    """
+    price_a: Kalshi 'Yes' price (e.g. 0.52)
+    price_b: Polymarket 'No' price (e.g. 0.44)
+    investment: Total USD to put into this trade
+    mode: 'Maker' (Limit Order) or 'Taker' (Market Order)
+    """
+    
+    # --- 2026 FEE CONFIGURATION ---
+    # Polymarket: 0% fee (Maker & Taker)
+    poly_fee_rate = 0.00
+    
+    # Kalshi: Maker is 0%, Taker is ~2% of the PROFIT portion
+    kalshi_fee_rate = 0.02 if mode == "Taker" else 0.00
+    
+    # --- ARB CALCULATIONS ---
+    total_prob = price_a + price_b
+    is_arb = total_prob < 1.00
+    
+    # Weighting the split to ensure equal payout regardless of outcome
+    shares_a = (investment / total_prob) / price_a
+    shares_b = (investment / total_prob) / price_b
+    
+    # Gross figures (Before fees)
+    gross_payout = (investment / total_prob)
+    gross_profit = gross_payout - investment
+    
+    # Calculate Kalshi fees specifically
+    # Kalshi only charges fees on the 'taker' profit of the contract
+    kalshi_spend = shares_a * price_a
+    kalshi_profit_portion = shares_a - kalshi_spend
+    fees = kalshi_profit_portion * kalshi_fee_rate
+    
+    # Net figures
+    net_profit = gross_profit - fees
+    roi = (net_profit / investment) * 100
+
+    # --- THE OUTPUT ---
+    print(f"\n" + "="*45)
+    print(f" LOGIC REPORT: {mode.upper()} STRATEGY ")
+    print("="*45)
+    print(f"Combined Market Cost: ${total_prob:.3f} per $1.00")
+    print(f"Opportunity Status: {'✅ MATHEMATICAL WIN' if is_arb else '❌ NO PROFIT GAP'}")
+    print("-" * 45)
+    
+    if is_arb:
+        print(f"STEP 1: Buy {math.floor(shares_a)} shares on Kalshi.")
+        print(f"STEP 2: Buy {math.floor(shares_b)} shares on Polymarket.")
+        print(f"\nEstimated Fees:  ${fees:.2f}")
+        print(f"NET PROFIT:      ${net_profit:.2f}")
+        print(f"NET ROI:         {roi:.2f}%")
+        
+        print("\n" + "*"*10 + " STRATEGIC REASSURANCE " + "*"*10)
+        
+        if mode == "Maker":
+            print("• Why this pays: You are using Limit Orders. The exchange rewards ")
+            print("  your patience with $0.00 fees, keeping every cent of the arb gap.")
+        else:
+            print("• Why this pays: Even after the 2% 'Taker' fee, the price gap ")
+            print("  is so wide that the math FORCES a profit regardless of the outcome.")
+            
+        print(f"• Logic: You have spent ${total_prob + (fees/investment):.3f} to 'buy' a guaranteed $1.00.")
+        print("• Safety: This is Delta-Neutral. You aren't betting on the event; ")
+        print("  you are betting on the two platforms being out of sync.")
+    else:
+        print("Wait for the prices to shift. Current gap favors the house.")
+
+# --- CHANGE YOUR NUMBERS HERE ---
+# Format: (Kalshi_Price, Poly_Price, Total_Investment, "Maker" or "Taker")
+calculate_arb_final(0.52, 0.44, 100, mode="Taker")

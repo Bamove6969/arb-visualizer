@@ -1,0 +1,60 @@
+import math
+
+def calculate_arb(price_a, price_b, investment):
+    # Implied probabilities (Cost per share is the market's 'percent' confidence)
+    prob_a = price_a
+    prob_b = price_b
+    total_prob = prob_a + prob_b
+    
+    # Arbitrage exists if total implied probability is less than 1.00
+    is_arb = total_prob < 1.00
+    
+    # Optimal share distribution (Weighted by price to ensure equal payout)
+    shares_a = (investment / total_prob) / price_a
+    shares_b = (investment / total_prob) / price_b
+    
+    # Total payout (since shares pay $1 on win)
+    payout = (investment / total_prob)
+    profit = payout - investment
+    roi = (profit / investment) * 100
+
+    print(f"\n--- ARBITRAGE ANALYSIS ---")
+    print(f"Total Combined Cost: ${total_prob:.2f} (Target: < $1.00)")
+    print(f"Status: {'✅ PROFITABLE OPPORTUNITY' if is_arb else '❌ NO ARBITRAGE'}")
+    print("-" * 30)
+
+    if is_arb:
+        print(f"To guarantee profit, buy:")
+        print(f"Side A: {math.floor(shares_a)} shares")
+        print(f"Side B: {math.floor(shares_b)} shares")
+        print(f"\nPotential Profit: ${profit:.2f} ({roi:.1f}% ROI)")
+        
+        print("\n" + "="*50)
+        print("STRATEGIC LOGIC & REASSURANCE")
+        print("="*50)
+        
+        # Logic for Side A winning
+        print(f"STRATEGY IF SIDE A WINS:")
+        print(f"• Why it pays: You spent ${price_a:.2f} per share on a contract that pays $1.00.")
+        print(f"• The Math: Your profit from Side A covers the total loss of Side B's cost.")
+        print(f"• Logic: The market is currently pricing this at {price_a*100:.0f}%, but your 'hedge' ")
+        print(f"  on Side B ensures that even if this high-probability event fails, you remain net-positive.")
+        
+        print("-" * 30)
+        
+        # Logic for Side B winning
+        print(f"STRATEGY IF SIDE B WINS:")
+        print(f"• Why it pays: This is your 'Underdog Insurance.' Even though you expect A, ")
+        print(f"  Side B pays out enough at ${1-price_b:.2f} profit per share to wipe out your Side A spend.")
+        print(f"• Logic: In prediction markets, 'The House' doesn't exist. You are simply exploiting the ")
+        print(f"  math gap where two different platforms (or sides) can't agree on the 100% total.")
+        
+        print("\nFinal Reassurance: This trade is mathematically 'Delta Neutral.' Regardless of ")
+        print("the real-world outcome, the total pool of money you've spent is less than the ")
+        print("guaranteed payout of the winning contract.")
+    else:
+        print("No mathematical gap found. If you trade here, you are betting, not 'arbing'.")
+
+# Example Usage: Price of 'Yes' on Kalshi vs Price of 'No' on Polymarket
+# Enter prices as decimals (e.g., 0.55 for 55 cents)
+calculate_arb(0.52, 0.44, 100)

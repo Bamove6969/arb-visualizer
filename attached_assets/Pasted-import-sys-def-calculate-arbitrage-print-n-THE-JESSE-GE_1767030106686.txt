@@ -1,0 +1,80 @@
+import sys
+
+def calculate_arbitrage():
+    print("\n--- 💸 THE JESSE & GEMINI ARBITRAGE HUNTER 💸 ---")
+    print("Remember: Only compare IDENTICAL questions (same rules, same deadlines).\n")
+
+    # --- INPUTS ---
+    # We take the "Yes" price. The "No" price is automatically calculated (1.00 - Yes).
+    # Enter prices as cents (e.g., 50 for 50 cents)
+    
+    site_a_name = input("Name of Site A (e.g. Kalshi): ")
+    try:
+        site_a_yes = float(input(f"Price of YES on {site_a_name} (in cents): "))
+    except ValueError:
+        print("Error: Please enter a number.")
+        return
+
+    site_b_name = input("Name of Site B (e.g. Poly): ")
+    try:
+        site_b_yes = float(input(f"Price of YES on {site_b_name} (in cents): "))
+    except ValueError:
+        print("Error: Please enter a number.")
+        return
+
+    # --- THE MATH ---
+    # To Arb, we buy YES on the cheaper site, and NO on the expensive site.
+    
+    # Scenario 1: Buy YES on A, Buy NO on B
+    # Cost to buy NO on B is roughly (100 - Yes_Price_B)
+    site_b_no_price = 100 - site_b_yes
+    cost_scenario_1 = site_a_yes + site_b_no_price
+    
+    # Scenario 2: Buy NO on A, Buy YES on B
+    # Cost to buy NO on A is roughly (100 - Yes_Price_A)
+    site_a_no_price = 100 - site_a_yes
+    cost_scenario_2 = site_a_no_price + site_b_yes
+
+    print("\n" + "="*40)
+    
+    # --- ANALYSIS SCENARIO 1 ---
+    print(f"\nScenario 1: Buy YES on {site_a_name} + Buy NO on {site_b_name}")
+    print(f"Cost: {cost_scenario_1}¢")
+    
+    if cost_scenario_1 < 100:
+        profit = 100 - cost_scenario_1
+        roi = (profit / cost_scenario_1) * 100
+        print(f"✅ PROFIT OPPORTUNITY! Margin: {profit}¢ per share.")
+        print(f"🚀 ROI: {roi:.2f}% (before fees)")
+        print(f"💡 If you invest $1,000, you make ${roi * 10:.2f} guaranteed.")
+    else:
+        print(f"❌ No edge here. (Loss/Breakeven: {cost_scenario_1 - 100}¢)")
+
+    print("-" * 20)
+
+    # --- ANALYSIS SCENARIO 2 ---
+    print(f"\nScenario 2: Buy NO on {site_a_name} + Buy YES on {site_b_name}")
+    print(f"Cost: {cost_scenario_2}¢")
+    
+    if cost_scenario_2 < 100:
+        profit = 100 - cost_scenario_2
+        roi = (profit / cost_scenario_2) * 100
+        print(f"✅ PROFIT OPPORTUNITY! Margin: {profit}¢ per share.")
+        print(f"🚀 ROI: {roi:.2f}% (before fees)")
+        print(f"💡 If you invest $1,000, you make ${roi * 10:.2f} guaranteed.")
+    else:
+        print(f"❌ No edge here. (Loss/Breakeven: {cost_scenario_2 - 100}¢)")
+        
+    print("\n" + "="*40)
+
+    # --- FEE WARNING ---
+    if "PredictIt" in [site_a_name, site_b_name]:
+        print("\n⚠️ WARNING: You mentioned PredictIt.")
+        print("They charge 10% on profits and 5% on withdrawal.")
+        print("Ensure your ROI is > 15% to be safe!")
+
+while True:
+    calculate_arbitrage()
+    again = input("\nCheck another market? (y/n): ")
+    if again.lower() != 'y':
+        break

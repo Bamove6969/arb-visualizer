@@ -1,0 +1,21 @@
+node_modules
+dist
+.DS_Store
+server/public
+vite.config.ts.*
+*.tar.gz
+
+# Android build artifacts
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/.idea/
+*.iml
+*.apk
+*.aab
+
+# Capacitor
+.capacitor/
+ios/App/build/
+ios/App/Pods/
